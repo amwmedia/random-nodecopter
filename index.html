@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>test</title>
+	<style type="text/css">
+		body {
+			background-color: #333;
+			color: white;
+		}
+		.dots {
+			position: absolute;
+			top: 0;
+			left: 0;
+			bottom: 0;
+			right: 0;
+			z-index: 1;
+		}
+		.dots .dot {
+			border-radius: 50%;
+			width: 50%;
+			height: 50%;
+			float: left;
+		}
+		.dots .dot .led {
+			position: absolute;
+			width: 30px;
+			height: 30px;
+			background-color: #0C9;
+			box-shadow: #0C9 0 0 20px;
+			margin: 35px;
+			border-radius: 50%;
+			content: '';
+			z-index: 4;
+		}
+
+		.dots .dot:after {
+			position: absolute;
+			width: 30px;
+			height: 30px;
+			background-color: #C00;
+			margin: 35px;
+			border-radius: 50%;
+			content: '';
+			z-index: 3;
+		}
+
+		.dots .dot:before {
+			position: absolute;
+			width: 100px;
+			height: 10px;
+			background-color: #999;
+			border-radius: 50%;
+			animation: spin 200ms infinite linear;
+			content: '';
+		}
+		.tr .led {
+			top: 0;
+			right: 0;
+		}
+		.tl .led {
+			top: 0;
+			left: 0;
+		}
+		.lr .led {
+			bottom: 0;
+			right: 0;
+		}
+		.ll .led {
+			bottom: 0;
+			left: 0;
+		}
+
+		.tr:before {
+			top: 50px;
+			right: 0;
+		}
+		.tl:before {
+			top: 50px;
+			left: 0;
+		}
+		.lr:before {
+			bottom: 50px;
+			right: 0;
+		}
+		.ll:before {
+			bottom: 50px;
+			left: 0;
+		}
+
+		.tr:after {
+			top: 0;
+			right: 0;
+		}
+		.tl:after {
+			top: 0;
+			left: 0;
+		}
+		.lr:after {
+			bottom: 0;
+			right: 0;
+		}
+		.ll:after {
+			bottom: 0;
+			left: 0;
+		}
+
+		h1 {
+			position: absolute;
+			width: 100%;
+			text-align: center;
+			top: 50%;
+			margin-top: -40px;
+			z-index: 2;
+			font-size: 50px;
+		}
+		#out {
+			position: absolute;
+			width: 100%;
+			text-align: center;
+			top: 50%;
+			margin-top: 20px;
+		}
+
+		@keyframes spin {
+			from {transform:rotate(0deg);}
+			to {transform:rotate(360deg);}
+		}
+	</style>
+</head>
+<body>
+	<h1>connecting...</h1>
+	<div id="out"></div>
+
+	<div class="dots">
+		<div class="dot tl"><div class="led" style="opacity: 0;"></div></div>
+		<div class="dot tr"><div class="led" style="opacity: 0;"></div></div>
+		<div class="dot ll"><div class="led" style="opacity: 0;"></div></div>
+		<div class="dot lr"><div class="led" style="opacity: 0;"></div></div>
+	</div>
+
+	<script src="/socket.io/socket.io.js"></script>
+	<script type="text/javascript">
+		var socket = io();
+		var prevData = {};
+		var leds = ['tl', 'tr', 'll', 'lr'],
+			ledsActive = false;
+
+		socket.on('leds', function () {
+			ledsActive = true;
+		});
+
+		socket.on('mainText', function (txt) {
+			document.getElementsByTagName('h1')[0].innerText = txt;
+		});
+
+		socket.on('data', function (data) {
+			var outEl = document.getElementById('out');
+			outEl.innerText = JSON.stringify(data);
+
+
+			if (data.a !== prevData.a ) {
+				Array.prototype.slice.call(document.getElementsByClassName('led')).forEach(function (el) {
+					el.style.opacity = 0;
+				});
+				if (ledsActive) {
+					document.getElementsByClassName(leds[data.a % 4])[0].getElementsByClassName('led')[0].style.opacity = 1;
+				}
+				// if ()
+				// leds.forEach(function (loc) {  });
+			}
+
+			prevData = JSON.parse(JSON.stringify(data));
+		});
+	</script>
+</body>
+</html>
